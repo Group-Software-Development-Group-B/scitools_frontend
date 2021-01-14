@@ -19,6 +19,26 @@ const particlesOptions = {
   }
 }
 
+let myHeaders = new Headers();
+myHeaders.append("Authorization", "Basic YjIxNjZlODAtYjczMi00NDA4LTkyZjEtYzUzYTUyM2YyMTIzOjc5YzAwNjMwNDY1Mzk3MTNlMWFkOTljM2EyYWIyNGUyZmQ3ODdiZDM3YWRjYTU4MWUxMWNiYzk1MWZkYWM1ODM=");
+
+let urlencoded = new URLSearchParams();
+urlencoded.append("grant_type", "password");
+urlencoded.append("username", "hallam-b");
+urlencoded.append("password", "GtA>9Ec?");
+
+let requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: urlencoded,
+  redirect: 'follow'
+};
+
+fetch("https://hallam.sci-toolset.com/api/v1/token", requestOptions)
+  .then(response => response.json())
+  .then(data => console.log(data))
+
+
 class App extends Component {
   constructor() {
     super();
@@ -30,10 +50,11 @@ class App extends Component {
         name: '',
         email: '',
         password: '',
-        joined: ''       
+        joined: ''      
       }
     }
   }
+
 
   loadUser = (data) => {
     this.setState({user: {
