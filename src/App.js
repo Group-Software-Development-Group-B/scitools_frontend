@@ -7,6 +7,9 @@ import Map from './components/Map/Map';
 import './App.css';
 import Particles from 'react-particles-js';
 
+var axios = require('axios');
+var qs = require('qs');
+
 const particlesOptions = {
   particles: {
     number: {
@@ -19,25 +22,72 @@ const particlesOptions = {
   }
 }
 
-let myHeaders = new Headers();
-myHeaders.append("Authorization", "Basic YjIxNjZlODAtYjczMi00NDA4LTkyZjEtYzUzYTUyM2YyMTIzOjc5YzAwNjMwNDY1Mzk3MTNlMWFkOTljM2EyYWIyNGUyZmQ3ODdiZDM3YWRjYTU4MWUxMWNiYzk1MWZkYWM1ODM=");
+let accessToken = "empty";
 
-let urlencoded = new URLSearchParams();
-urlencoded.append("grant_type", "password");
-urlencoded.append("username", "hallam-b");
-urlencoded.append("password", "GtA>9Ec?");
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-let requestOptions = {
-  method: 'POST',
-  headers: myHeaders,
-  body: urlencoded,
-  redirect: 'follow'
+const authenticate = new Promise (function(resolve,reject) {
+    console.log("Starting authenticate");
+    var data = qs.stringify({
+        'grant_type': 'password',
+        'username': 'hallam-c',
+        'password': '6&m_gHw5'
+    });
+    var config = {
+        method: 'post',
+        url: 'https://hallam.sci-toolset.com/api/v1/token',
+        headers: {
+            'Authorization': 'Basic YjIxNjZlODAtYjczMi00NDA4LTkyZjEtYzUzYTUyM2YyMTIzOjc5YzAwNjMwNDY1Mzk3MTNlMWFkOTljM2EyYWIyNGUyZmQ3ODdiZDM3YWRjYTU4MWUxMWNiYzk1MWZkYWM1ODM=',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: data
+    };
+
+    axios(config)
+        .then(function (response) {
+            console.log(JSON.stringify(response.data));
+            accessToken = response.data.access_token;
+            console.log("the received access token: " + accessToken);
+            resolve('token recovered and saved');
+            
+        })
+        .catch(function (error) {
+            console.log(error);
+            reject('error recovering token: '+error);
+        });
+
+});
+
+async function getMissions(access_token) {
+    console.log("Starting getMissions() with token: " + access_token);
+    var config = {
+        method: 'get',
+        url: 'https://hallam.sci-toolset.com/discover/api/v1/missionfeed/missions',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Host': 'hallam.sci-toolset.com',
+            'Authorization': 'Bearer ' + access_token
+        }
+    };
+
+    axios(config)
+        .then(function (response) {
+            console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    return;
+
 };
 
-fetch("https://hallam.sci-toolset.com/api/v1/token", requestOptions)
-  .then(response => response.json())
-  .then(data => console.log(data))
-
+  authenticate.then (function authenticated(response) {
+        console.log("the Token: " + accessToken);
+        getMissions(accessToken);
+    }).catch(() => {
+        console.log("error");
+    }); 
 
 class App extends Component {
   constructor() {
